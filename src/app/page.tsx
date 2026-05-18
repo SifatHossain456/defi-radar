@@ -1,65 +1,184 @@
-import Image from "next/image";
+import { Suspense } from 'react'
+import { getGlobalData, getTopCoins, fmt, fmtPrice } from '@/lib/coingecko'
+import { getChainTVLs, fmtTVL } from '@/lib/defillama'
+import StatCard from '@/components/StatCard'
+import WalletPortfolio from '@/components/WalletPortfolio'
+import GasTracker from '@/components/GasTracker'
+import { TrendingUp, Globe, BarChart2, Layers, ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import Link from 'next/link'
 
-export default function Home() {
+async function GlobalStats() {
+  const [global, coins] = await Promise.all([getGlobalData(), getTopCoins(1, 5)])
+  const btc = coins.find((c) => c.id === 'bitcoin')
+  const eth = coins.find((c) => c.id === 'ethereum')
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <StatCard
+        label="Total Market Cap"
+        value={fmt(global.total_market_cap?.usd ?? 0)}
+        change={global.market_cap_change_percentage_24h_usd}
+        icon={Globe}
+        accent="#00d4ff"
+      />
+      <StatCard
+        label="Bitcoin (BTC)"
+        value={fmtPrice(btc?.current_price ?? 0)}
+        change={btc?.price_change_percentage_24h}
+        icon={TrendingUp}
+        accent="#F7931A"
+      />
+      <StatCard
+        label="Ethereum (ETH)"
+        value={fmtPrice(eth?.current_price ?? 0)}
+        change={eth?.price_change_percentage_24h}
+        icon={BarChart2}
+        accent="#627EEA"
+      />
+      <StatCard
+        label="24h Volume"
+        value={fmt(global.total_volume?.usd ?? 0)}
+        icon={Layers}
+        accent="#7c3aed"
+      />
     </div>
-  );
+  )
+}
+
+async function TopCoinsTable() {
+  const coins = await getTopCoins(1, 8)
+  return (
+    <div className="bg-[#111111] border border-[#1e1e1e] rounded-xl overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-[#1e1e1e]">
+        <h2 className="font-semibold text-sm">Top Coins</h2>
+        <Link href="/markets" className="text-xs text-[#00d4ff] hover:underline">View all →</Link>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead>
+            <tr className="text-[#71717a] text-xs border-b border-[#1e1e1e]">
+              <th className="px-5 py-3 text-left font-medium">#</th>
+              <th className="px-3 py-3 text-left font-medium">Name</th>
+              <th className="px-3 py-3 text-right font-medium">Price</th>
+              <th className="px-3 py-3 text-right font-medium">24h</th>
+              <th className="px-3 py-3 text-right font-medium hidden lg:table-cell">Market Cap</th>
+              <th className="px-3 py-3 text-right font-medium hidden xl:table-cell">Volume 24h</th>
+            </tr>
+          </thead>
+          <tbody>
+            {coins.map((coin) => {
+              const pos = coin.price_change_percentage_24h >= 0
+              return (
+                <tr key={coin.id} className="border-b border-[#1a1a1a] hover:bg-[#161616] transition-colors">
+                  <td className="px-5 py-3.5 text-[#71717a] text-sm">{coin.market_cap_rank}</td>
+                  <td className="px-3 py-3.5">
+                    <div className="flex items-center gap-2.5">
+                      <img src={coin.image} alt={coin.name} className="w-6 h-6 rounded-full" />
+                      <div>
+                        <p className="text-sm font-medium leading-none">{coin.name}</p>
+                        <p className="text-xs text-[#71717a] uppercase mt-0.5">{coin.symbol}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-3 py-3.5 text-right text-sm font-mono">{fmtPrice(coin.current_price)}</td>
+                  <td className="px-3 py-3.5 text-right">
+                    <span className={`flex items-center justify-end gap-0.5 text-xs font-medium ${pos ? 'text-[#22c55e]' : 'text-[#ef4444]'}`}>
+                      {pos ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                      {Math.abs(coin.price_change_percentage_24h).toFixed(2)}%
+                    </span>
+                  </td>
+                  <td className="px-3 py-3.5 text-right text-sm text-[#a1a1aa] hidden lg:table-cell">{fmt(coin.market_cap)}</td>
+                  <td className="px-3 py-3.5 text-right text-sm text-[#a1a1aa] hidden xl:table-cell">{fmt(coin.total_volume)}</td>
+                </tr>
+              )
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  )
+}
+
+async function ChainTVLs() {
+  const chains = await getChainTVLs()
+  return (
+    <div className="bg-[#111111] border border-[#1e1e1e] rounded-xl p-5">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="font-semibold text-sm">Chain TVL</h3>
+        <Link href="/protocols" className="text-xs text-[#00d4ff] hover:underline">Protocols →</Link>
+      </div>
+      <div className="space-y-3">
+        {chains.slice(0, 7).map((chain: { name: string; tvl: number }, i: number) => {
+          const maxTVL = chains[0].tvl
+          const pct = (chain.tvl / maxTVL) * 100
+          return (
+            <div key={chain.name}>
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span className="text-[#a1a1aa]">{chain.name}</span>
+                <span className="font-mono">{fmtTVL(chain.tvl)}</span>
+              </div>
+              <div className="h-1.5 bg-[#1e1e1e] rounded-full overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all"
+                  style={{
+                    width: `${pct}%`,
+                    background: i === 0 ? '#00d4ff' : i === 1 ? '#7c3aed' : '#374151',
+                  }}
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+function SkeletonCard() {
+  return (
+    <div className="bg-[#111111] border border-[#1e1e1e] rounded-xl p-5 animate-pulse">
+      <div className="h-3 bg-[#1e1e1e] rounded w-24 mb-4" />
+      <div className="h-7 bg-[#1e1e1e] rounded w-32 mb-2" />
+      <div className="h-3 bg-[#1e1e1e] rounded w-16" />
+    </div>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <div>
+      <div className="mb-6">
+        <h1 className="text-xl font-bold">Dashboard</h1>
+        <p className="text-sm text-[#71717a] mt-1">Real-time DeFi market intelligence</p>
+      </div>
+
+      <Suspense fallback={
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
+        </div>
+      }>
+        <GlobalStats />
+      </Suspense>
+
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <div className="xl:col-span-2 space-y-4">
+          <Suspense fallback={
+            <div className="bg-[#111111] border border-[#1e1e1e] rounded-xl p-5 animate-pulse h-72" />
+          }>
+            <TopCoinsTable />
+          </Suspense>
+        </div>
+
+        <div className="space-y-4">
+          <WalletPortfolio />
+          <Suspense fallback={
+            <div className="bg-[#111111] border border-[#1e1e1e] rounded-xl p-5 animate-pulse h-48" />
+          }>
+            <ChainTVLs />
+          </Suspense>
+          <GasTracker />
+        </div>
+      </div>
+    </div>
+  )
 }
