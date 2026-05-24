@@ -17,12 +17,13 @@ interface GasEntry {
   label: string
   color: string
   gwei: string | null
+  error: boolean
   loading: boolean
 }
 
 export default function GasTracker() {
   const [entries, setEntries] = useState<GasEntry[]>(
-    CHAINS_GAS.map((c) => ({ label: c.label, color: c.color, gwei: null, loading: true }))
+    CHAINS_GAS.map((c) => ({ label: c.label, color: c.color, gwei: null, error: false, loading: true }))
   )
 
   useEffect(() => {
@@ -36,7 +37,8 @@ export default function GasTracker() {
         results.map((r, i) => ({
           label: CHAINS_GAS[i].label,
           color: CHAINS_GAS[i].color,
-          gwei: r.status === 'fulfilled' ? parseFloat(formatUnits(r.value, 9)).toFixed(2) : 'err',
+          gwei: r.status === 'fulfilled' ? parseFloat(formatUnits(r.value, 9)).toFixed(2) : null,
+          error: r.status === 'rejected',
           loading: false,
         }))
       )
@@ -55,18 +57,18 @@ export default function GasTracker() {
         <span className="w-1.5 h-1.5 rounded-full bg-[#22c55e] live-dot ml-auto" />
       </div>
       <div className="space-y-2.5">
-        {entries.map(({ label, color, gwei, loading }) => (
+        {entries.map(({ label, color, gwei, error, loading }) => (
           <div key={label} className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full" style={{ background: color }} />
               <span className="text-sm text-[#a1a1aa]">{label}</span>
             </div>
             {loading ? (
-              <div className="w-16 h-4 bg-[#1e1e1e] rounded animate-pulse" />
+              <div className="w-16 h-4 bg-[#1e1e1e] rounded animate-pulse" aria-label="Loading" />
+            ) : error ? (
+              <span className="text-sm font-mono text-[#ef4444]" title="Failed to fetch">—</span>
             ) : (
-              <span className="text-sm font-mono font-medium">
-                {gwei === 'err' ? <span className="text-[#ef4444]">—</span> : `${gwei} Gwei`}
-              </span>
+              <span className="text-sm font-mono font-medium">{gwei} Gwei</span>
             )}
           </div>
         ))}

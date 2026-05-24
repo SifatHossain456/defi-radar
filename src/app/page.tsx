@@ -54,7 +54,7 @@ async function TopCoinsTable() {
         <Link href="/markets" className="text-xs text-[#00d4ff] hover:underline">View all →</Link>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="w-full" aria-label="Top coins by market cap">
           <thead>
             <tr className="text-[#71717a] text-xs border-b border-[#1e1e1e]">
               <th className="px-5 py-3 text-left font-medium">#</th>
@@ -108,27 +108,24 @@ async function ChainTVLs() {
         <Link href="/protocols" className="text-xs text-[#00d4ff] hover:underline">Protocols →</Link>
       </div>
       <div className="space-y-3">
-        {chains.slice(0, 7).map((chain: { name: string; tvl: number }, i: number) => {
-          const maxTVL = chains[0].tvl
-          const pct = (chain.tvl / maxTVL) * 100
-          return (
-            <div key={chain.name}>
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-[#a1a1aa]">{chain.name}</span>
-                <span className="font-mono">{fmtTVL(chain.tvl)}</span>
+        {(() => {
+          const PALETTE = ['#00d4ff', '#7c3aed', '#22c55e', '#f97316', '#f59e0b', '#ec4899', '#6366f1']
+          const maxTVL = chains[0]?.tvl ?? 1
+          return chains.slice(0, 7).map((chain: { name: string; tvl: number }, i: number) => {
+            const pct = (chain.tvl / maxTVL) * 100
+            return (
+              <div key={chain.name}>
+                <div className="flex items-center justify-between text-xs mb-1">
+                  <span className="text-[#a1a1aa]">{chain.name}</span>
+                  <span className="font-mono">{fmtTVL(chain.tvl)}</span>
+                </div>
+                <div className="h-1.5 bg-[#1e1e1e] rounded-full overflow-hidden">
+                  <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: PALETTE[i % PALETTE.length] }} />
+                </div>
               </div>
-              <div className="h-1.5 bg-[#1e1e1e] rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all"
-                  style={{
-                    width: `${pct}%`,
-                    background: i === 0 ? '#00d4ff' : i === 1 ? '#7c3aed' : '#374151',
-                  }}
-                />
-              </div>
-            </div>
-          )
-        })}
+            )
+          })
+        })()}
       </div>
     </div>
   )

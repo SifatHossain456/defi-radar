@@ -1,12 +1,8 @@
+'use client'
+
 import Link from 'next/link'
-import {
-  LayoutDashboard,
-  TrendingUp,
-  Database,
-  Search,
-  Zap,
-  Radio,
-} from 'lucide-react'
+import { usePathname } from 'next/navigation'
+import { LayoutDashboard, TrendingUp, Database, Search, Zap, Radio } from 'lucide-react'
 
 const NAV = [
   { href: '/', label: 'Dashboard', icon: LayoutDashboard },
@@ -17,6 +13,8 @@ const NAV = [
 ]
 
 export default function Sidebar() {
+  const pathname = usePathname()
+
   return (
     <aside className="w-60 flex-shrink-0 bg-[#111111] border-r border-[#1e1e1e] flex flex-col hidden md:flex">
       <div className="px-5 py-5 border-b border-[#1e1e1e]">
@@ -29,17 +27,22 @@ export default function Sidebar() {
         <p className="text-xs text-[#71717a] mt-1 ml-10.5">Multi-Chain Intelligence</p>
       </div>
 
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {NAV.map(({ href, label, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[#a1a1aa] hover:text-white hover:bg-[#1a1a1a] transition-colors text-sm font-medium group"
-          >
-            <Icon className="w-4 h-4 group-hover:text-[#00d4ff] transition-colors" />
-            {label}
-          </Link>
-        ))}
+      <nav className="flex-1 px-3 py-4 space-y-0.5" aria-label="Main navigation">
+        {NAV.map(({ href, label, icon: Icon }) => {
+          const active = pathname === href
+          return (
+            <Link
+              key={href}
+              href={href}
+              aria-current={active ? 'page' : undefined}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-sm font-medium"
+              style={{ background: active ? 'rgba(0,212,255,0.1)' : undefined, color: active ? '#00d4ff' : '#a1a1aa' }}
+            >
+              <Icon className="w-4 h-4" style={{ color: active ? '#00d4ff' : undefined }} />
+              {label}
+            </Link>
+          )
+        })}
       </nav>
 
       <div className="px-4 py-4 border-t border-[#1e1e1e]">
