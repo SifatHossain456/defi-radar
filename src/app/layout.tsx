@@ -9,8 +9,20 @@ const geistSans = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 const geistMono = Geist_Mono({ variable: '--font-geist-mono', subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'DeFi Radar — Multi-Chain Intelligence',
+  title: { default: 'DeFi Radar — Multi-Chain Intelligence', template: '%s — DeFi Radar' },
   description: 'Real-time DeFi portfolio tracker, market intelligence, protocol analytics, and token risk analyzer.',
+  keywords: ['DeFi', 'portfolio tracker', 'multi-chain', 'yield', 'gas tracker', 'market cap', 'crypto'],
+  openGraph: {
+    title: 'DeFi Radar — Multi-Chain Intelligence',
+    description: 'Real-time DeFi portfolio tracker, market intelligence, protocol analytics, and token risk analyzer.',
+    type: 'website',
+    siteName: 'DeFi Radar',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'DeFi Radar — Multi-Chain Intelligence',
+    description: 'Real-time DeFi portfolio tracker and multi-chain market intelligence.',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
