@@ -1,3 +1,9 @@
+import type { Metadata } from 'next'
+export const metadata: Metadata = {
+  title: 'Token Risk Analyzer',
+  description: 'Analyze any token for risk factors — liquidity, holder concentration, contract audit status and more.',
+}
+
 import TokenAnalyzerClient from './TokenAnalyzerClient'
 
 export default function AnalyzerPage() {

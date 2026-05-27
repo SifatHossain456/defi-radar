@@ -1,3 +1,9 @@
+import type { Metadata } from 'next'
+export const metadata: Metadata = {
+  title: 'Yield Farming',
+  description: 'Top DeFi yield opportunities ranked by APY — live pool data from DefiLlama.',
+}
+
 import { getTopYields, fmtTVL } from '@/lib/defillama'
 import { Zap, Shield } from 'lucide-react'
 

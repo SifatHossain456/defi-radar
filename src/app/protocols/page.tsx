@@ -1,3 +1,9 @@
+import type { Metadata } from 'next'
+export const metadata: Metadata = {
+  title: 'Protocols',
+  description: 'Top DeFi protocols ranked by TVL — live data from DefiLlama across all chains.',
+}
+
 import { getTopProtocols, getChainTVLs, fmtTVL } from '@/lib/defillama'
 import { ArrowUpRight, ArrowDownRight, ExternalLink } from 'lucide-react'
 

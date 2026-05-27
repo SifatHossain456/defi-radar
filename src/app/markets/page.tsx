@@ -1,3 +1,9 @@
+import type { Metadata } from 'next'
+export const metadata: Metadata = {
+  title: 'Markets',
+  description: 'Top crypto markets by market cap — live prices, 24h change, volume and market cap.',
+}
+
 import { getTopCoins, getTrending, fmt, fmtPrice } from '@/lib/coingecko'
 import { ArrowUpRight, ArrowDownRight, Flame } from 'lucide-react'
 
