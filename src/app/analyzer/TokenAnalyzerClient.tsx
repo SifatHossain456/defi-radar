@@ -149,6 +149,7 @@ export default function TokenAnalyzerClient() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Enter CoinGecko ID (bitcoin, ethereum, uniswap...)"
+            aria-label="Token CoinGecko ID"
             className="w-full bg-[#111111] border border-[#1e1e1e] rounded-xl pl-9 pr-4 py-3 text-sm outline-none focus:border-[#00d4ff] transition-colors placeholder:text-[#71717a]"
           />
         </div>
@@ -339,9 +340,9 @@ export default function TokenAnalyzerClient() {
           {coin.description?.en && (
             <div className="bg-[#111111] border border-[#1e1e1e] rounded-xl p-5">
               <h3 className="font-semibold text-sm mb-3">About {coin.name}</h3>
-              <p className="text-sm text-[#a1a1aa] leading-relaxed line-clamp-6"
-                dangerouslySetInnerHTML={{ __html: coin.description.en.replace(/<[^>]+>/g, '') }}
-              />
+              <p className="text-sm text-[#a1a1aa] leading-relaxed line-clamp-6">
+                {coin.description.en.replace(/<[^>]+>/g, '')}
+              </p>
             </div>
           )}
         </div>
